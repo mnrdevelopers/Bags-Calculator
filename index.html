@@ -6,7 +6,7 @@
     <title>Bag to Acre Calculator</title>
     <meta name="description" content="Convert bags to quintals and acres">
     <meta name="theme-color" content="#4CAF50">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <style>
         :root {
             --primary: #4CAF50;
@@ -174,7 +174,7 @@
         .install-btn {
             margin-top: 20px;
             background: var(--secondary);
-            display: none; /* Hidden by default */
+            display: none;
         }
         
         @media (max-width: 480px) {
@@ -219,15 +219,18 @@
     <script>
         // Calculator functionality
         document.getElementById('calculate').addEventListener('click', function() {
-            const bags = parseFloat(document.getElementById('bags').value);
+            const bagsInput = document.getElementById('bags');
+            const bags = parseFloat(bagsInput.value);
             
-            if (isNaN(bags) {
+            if (isNaN(bags)) {
                 alert('Please enter a valid number');
+                bagsInput.focus();
                 return;
             }
             
             if (bags < 0) {
                 alert('Please enter a positive number');
+                bagsInput.focus();
                 return;
             }
             
@@ -239,78 +242,70 @@
             
             // Display results
             document.getElementById('quintals').textContent = quintals.toFixed(2);
-            document.getElementById('acres').textContent = acres.toFixed(2);
+            document.getElementById('acres').textContent = acres.toFixed(4);
             document.getElementById('quintals-step').style.display = 'block';
             document.getElementById('result').style.display = 'block';
         });
 
         // PWA Installation Handling
-        window.addEventListener('load', () => {
-            // Register service worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js')
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt event fired');
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install button
+            installBtn.style.display = 'block';
+        });
+        
+        installBtn.addEventListener('click', async () => {
+            console.log('Install button clicked');
+            if (!deferredPrompt) {
+                console.log('No deferred prompt available');
+                return;
+            }
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            
+            // Hide the install button
+            installBtn.style.display = 'none';
+            
+            // We've used the prompt, and can't use it again, throw it away
+            deferredPrompt = null;
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            installBtn.style.display = 'none';
+            deferredPrompt = null;
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
-                        console.log('ServiceWorker registered');
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
                     .catch(err => {
-                        console.log('ServiceWorker registration failed:', err);
+                        console.log('ServiceWorker registration failed: ', err);
                     });
-            }
-
-            // Install prompt handling
-            let deferredPrompt;
-            const installBtn = document.getElementById('installBtn');
-
-            window.addEventListener('beforeinstallprompt', (e) => {
-                console.log('beforeinstallprompt event fired');
-                // Prevent Chrome 67 and earlier from automatically showing the prompt
-                e.preventDefault();
-                // Stash the event so it can be triggered later
-                deferredPrompt = e;
-                // Show the install button
-                installBtn.style.display = 'block';
-                
-                // Set timeout to hide the button if not shown after 3 seconds
-                setTimeout(() => {
-                    if (installBtn.style.display === 'block' && !deferredPrompt) {
-                        installBtn.style.display = 'none';
-                    }
-                }, 3000);
             });
+        }
 
-            installBtn.addEventListener('click', (e) => {
-                if (!deferredPrompt) {
-                    console.log('No install prompt available');
-                    installBtn.style.display = 'none';
-                    return;
-                }
-                
-                // Show the install prompt
-                deferredPrompt.prompt();
-                
-                // Wait for the user to respond to the prompt
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted install');
-                    } else {
-                        console.log('User dismissed install');
-                    }
-                    deferredPrompt = null;
-                    installBtn.style.display = 'none';
-                });
-            });
-
-            window.addEventListener('appinstalled', (evt) => {
-                console.log('App installed');
-                installBtn.style.display = 'none';
-                deferredPrompt = null;
-            });
-
-            // Check if the app is already installed
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                installBtn.style.display = 'none';
-            }
-        });
+        // Check if running as PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Running as PWA');
+            installBtn.style.display = 'none';
+        }
     </script>
 </body>
 </html>
