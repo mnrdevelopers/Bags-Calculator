@@ -174,7 +174,7 @@
         .install-btn {
             margin-top: 20px;
             background: var(--secondary);
-            display: none;
+            display: none; /* Hidden by default */
         }
         
         @media (max-width: 480px) {
@@ -221,8 +221,13 @@
         document.getElementById('calculate').addEventListener('click', function() {
             const bags = parseFloat(document.getElementById('bags').value);
             
-            if (isNaN(bags) || bags < 0) {
-                alert('Please enter a valid number of bags');
+            if (isNaN(bags) {
+                alert('Please enter a valid number');
+                return;
+            }
+            
+            if (bags < 0) {
+                alert('Please enter a positive number');
                 return;
             }
             
@@ -238,49 +243,74 @@
             document.getElementById('quintals-step').style.display = 'block';
             document.getElementById('result').style.display = 'block';
         });
-        
-        // PWA installation
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-        
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'block';
-        });
-        
-        installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                installBtn.style.display = 'none';
-            }
-            
-            deferredPrompt = null;
-        });
-        
-        window.addEventListener('appinstalled', () => {
-            installBtn.style.display = 'none';
-            deferredPrompt = null;
-        });
-    </script>
-    
-    <script>
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+
+        // PWA Installation Handling
+        window.addEventListener('load', () => {
+            // Register service worker
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
-                        console.log('ServiceWorker registration successful');
+                        console.log('ServiceWorker registered');
                     })
                     .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
+                        console.log('ServiceWorker registration failed:', err);
                     });
+            }
+
+            // Install prompt handling
+            let deferredPrompt;
+            const installBtn = document.getElementById('installBtn');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('beforeinstallprompt event fired');
+                // Prevent Chrome 67 and earlier from automatically showing the prompt
+                e.preventDefault();
+                // Stash the event so it can be triggered later
+                deferredPrompt = e;
+                // Show the install button
+                installBtn.style.display = 'block';
+                
+                // Set timeout to hide the button if not shown after 3 seconds
+                setTimeout(() => {
+                    if (installBtn.style.display === 'block' && !deferredPrompt) {
+                        installBtn.style.display = 'none';
+                    }
+                }, 3000);
             });
-        }
+
+            installBtn.addEventListener('click', (e) => {
+                if (!deferredPrompt) {
+                    console.log('No install prompt available');
+                    installBtn.style.display = 'none';
+                    return;
+                }
+                
+                // Show the install prompt
+                deferredPrompt.prompt();
+                
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted install');
+                    } else {
+                        console.log('User dismissed install');
+                    }
+                    deferredPrompt = null;
+                    installBtn.style.display = 'none';
+                });
+            });
+
+            window.addEventListener('appinstalled', (evt) => {
+                console.log('App installed');
+                installBtn.style.display = 'none';
+                deferredPrompt = null;
+            });
+
+            // Check if the app is already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                installBtn.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
