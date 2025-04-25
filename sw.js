@@ -1,11 +1,11 @@
 const CACHE_NAME = 'bag-calculator-v2';
 const ASSETS_TO_CACHE = [
-  '/Bags-Calculator/',
-  '/Bags-Calculator/index.html',
-  '/Bags-Calculator/manifest.json',
-  '/Bags-Calculator/icon-192.png',
-  '/Bags-Calculator/icon-512.png',
-  '/Bags-Calculator/style.css'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/style.css'
 ];
 
 self.addEventListener('install', (event) => {
