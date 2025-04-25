@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bag-calculator-v1';
+const CACHE_NAME = 'bag-calculator-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
