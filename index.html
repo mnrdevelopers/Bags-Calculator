@@ -337,47 +337,64 @@
             document.getElementById('result').style.display = 'block';
         });
         
-        // PWA installation
+        // PWA Installation Handling
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
         
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt event fired');
+            // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
+            // Stash the event so it can be triggered later
             deferredPrompt = e;
+            // Show the install button
             installBtn.style.display = 'block';
         });
         
         installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                installBtn.style.display = 'none';
+            console.log('Install button clicked');
+            if (!deferredPrompt) {
+                console.log('No deferred prompt available');
+                return;
             }
             
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            
+            // Hide the install button
+            installBtn.style.display = 'none';
+            
+            // We've used the prompt, and can't use it again, throw it away
             deferredPrompt = null;
         });
         
         window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
             installBtn.style.display = 'none';
             deferredPrompt = null;
         });
-    </script>
-    
-    <script>
+
         // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
-                        console.log('ServiceWorker registration successful');
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
                     .catch(err => {
                         console.log('ServiceWorker registration failed: ', err);
                     });
             });
+        }
+
+        // Check if running as PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Running as PWA');
+            installBtn.style.display = 'none';
         }
     </script>
 </body>
