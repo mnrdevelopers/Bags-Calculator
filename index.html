@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bag to Acre Calculator</title>
-    <meta name="description" content="Convert bags to quintals and acres">
+    <title>Agricultural Calculator</title>
+    <meta name="description" content="Convert between bags and acres">
     <meta name="theme-color" content="#4CAF50">
     <link rel="manifest" href="manifest.json">
     <style>
@@ -61,6 +61,30 @@
             margin-bottom: 20px;
             text-align: center;
             font-weight: 600;
+        }
+        
+        .toggle-container {
+            display: flex;
+            margin-bottom: 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn.active {
+            background: var(--primary);
+            color: white;
         }
         
         .input-group {
@@ -191,25 +215,36 @@
     <div class="container">
         <h1>Agricultural Calculator</h1>
         
-        <div class="input-group">
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="bagsToAcresBtn">Bags to Acres</button>
+            <button class="toggle-btn" id="acresToBagsBtn">Acres to Bags</button>
+        </div>
+        
+        <div class="input-group" id="bagsInputGroup">
             <label for="bags">Number of Bags</label>
             <input type="number" id="bags" placeholder="Enter number of bags" min="0" step="1">
+        </div>
+        
+        <div class="input-group" id="acresInputGroup" style="display: none;">
+            <label for="acresInput">Number of Acres</label>
+            <input type="number" id="acresInput" placeholder="Enter number of acres" min="0" step="0.01">
         </div>
         
         <button id="calculate">Calculate</button>
         
         <div class="result" id="result">
-            <div class="calculation-steps">
-                <div class="step" id="quintals-step">Quintals: <span id="quintals">0</span></div>
-                <div class="step">Acreage:</div>
+            <div class="calculation-steps" id="calculationSteps">
+                <!-- Steps will be filled dynamically -->
             </div>
-            <div class="result-value" id="acres">0</div>
+            <div class="result-value" id="resultValue">0</div>
             <div class="formula">
-                <strong>Calculation Formula:</strong><br>
-                Quintals = Bags × 0.40<br>
-                Acres = Quintals ÷ 32<br><br>
-                <em>Example: 80 bags × 0.40 = 32 quintals<br>
-                32 quintals ÷ 32 = 1 acre</em>
+                <strong>Calculation Formulas:</strong><br>
+                <span id="formulaText">
+                    Quintals = Bags × 0.40<br>
+                    Acres = Quintals ÷ 32<br><br>
+                    <em>Example: 80 bags × 0.40 = 32 quintals<br>
+                    32 quintals ÷ 32 = 1 acre</em>
+                </span>
             </div>
         </div>
         
@@ -217,36 +252,91 @@
     </div>
 
     <script>
+        // Mode toggling
+        const bagsToAcresBtn = document.getElementById('bagsToAcresBtn');
+        const acresToBagsBtn = document.getElementById('acresToBagsBtn');
+        const bagsInputGroup = document.getElementById('bagsInputGroup');
+        const acresInputGroup = document.getElementById('acresInputGroup');
+        const formulaText = document.getElementById('formulaText');
+        
+        bagsToAcresBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            acresToBagsBtn.classList.remove('active');
+            bagsInputGroup.style.display = 'block';
+            acresInputGroup.style.display = 'none';
+            formulaText.innerHTML = `
+                Quintals = Bags × 0.40<br>
+                Acres = Quintals ÷ 32<br><br>
+                <em>Example: 80 bags × 0.40 = 32 quintals<br>
+                32 quintals ÷ 32 = 1 acre</em>
+            `;
+        });
+        
+        acresToBagsBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            bagsToAcresBtn.classList.remove('active');
+            acresInputGroup.style.display = 'block';
+            bagsInputGroup.style.display = 'none';
+            formulaText.innerHTML = `
+                Quintals = Acres × 32<br>
+                Bags = Quintals ÷ 0.40<br><br>
+                <em>Example: 1 acre × 32 = 32 quintals<br>
+                32 quintals ÷ 0.40 = 80 bags</em>
+            `;
+        });
+        
         // Calculator functionality
         document.getElementById('calculate').addEventListener('click', function() {
-            const bagsInput = document.getElementById('bags');
-            const bags = parseFloat(bagsInput.value);
+            const calculationSteps = document.getElementById('calculationSteps');
+            const resultValue = document.getElementById('resultValue');
             
-            if (isNaN(bags)) {
-                alert('Please enter a valid number');
-                bagsInput.focus();
-                return;
+            if (bagsToAcresBtn.classList.contains('active')) {
+                // Bags to Acres calculation
+                const bags = parseFloat(document.getElementById('bags').value);
+                
+                if (isNaN(bags) || bags < 0) {
+                    alert('Please enter a valid number of bags');
+                    return;
+                }
+                
+                // Calculate quintals: bags * 0.40
+                const quintals = bags * 0.40;
+                
+                // Calculate acres: quintals / 32
+                const acres = quintals / 32;
+                
+                // Display results
+                calculationSteps.innerHTML = `
+                    <div class="step">Quintals = ${bags} × 0.40 = ${quintals.toFixed(2)}</div>
+                    <div class="step">Acres = ${quintals.toFixed(2)} ÷ 32 = ${acres.toFixed(2)}</div>
+                `;
+                resultValue.textContent = acres.toFixed(2) + ' acres';
+            } else {
+                // Acres to Bags calculation
+                const acres = parseFloat(document.getElementById('acresInput').value);
+                
+                if (isNaN(acres) || acres < 0) {
+                    alert('Please enter a valid number of acres');
+                    return;
+                }
+                
+                // Calculate quintals: acres * 32
+                const quintals = acres * 32;
+                
+                // Calculate bags: quintals / 0.40
+                const bags = quintals / 0.40;
+                
+                // Display results
+                calculationSteps.innerHTML = `
+                    <div class="step">Quintals = ${acres} × 32 = ${quintals.toFixed(2)}</div>
+                    <div class="step">Bags = ${quintals.toFixed(2)} ÷ 0.40 = ${bags.toFixed(2)}</div>
+                `;
+                resultValue.textContent = bags.toFixed(2) + ' bags';
             }
             
-            if (bags < 0) {
-                alert('Please enter a positive number');
-                bagsInput.focus();
-                return;
-            }
-            
-            // Calculate quintals: bags * 0.40
-            const quintals = bags * 0.40;
-            
-            // Calculate acres: quintals / 32
-            const acres = quintals / 32;
-            
-            // Display results
-            document.getElementById('quintals').textContent = quintals.toFixed(2);
-            document.getElementById('acres').textContent = acres.toFixed(4);
-            document.getElementById('quintals-step').style.display = 'block';
             document.getElementById('result').style.display = 'block';
         });
-
+        
         // PWA Installation Handling
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
