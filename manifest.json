@@ -2,7 +2,7 @@
   "name": "Bag to Acre Calculator",
   "short_name": "BagCalc",
   "description": "Convert bags to acres easily",
-  "start_url": "/",
+  "start_url": "mnrdevelopers.github.io/Bags-Calculator/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4CAF50",
