@@ -1,6 +1,6 @@
 {
-  "name": "Bag to Acre Calculator",
-  "short_name": "BagCalc",
+  "name": "Agriculture Calculator",
+  "short_name": "AgriCalc",
   "description": "Convert bags to acres easily",
   "start_url": "/",
   "display": "standalone",
