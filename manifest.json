@@ -1,24 +1,21 @@
 {
-  "name": "Agricultural Calculator",
-  "short_name": "AgriCalc",
-  "description": "Convert between bags and acres",
- "start_url": "/",
-  "scope": "/",
+  "name": "Bag to Acre Calculator",
+  "short_name": "BagCalc",
+  "description": "Convert bags to acres easily",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4CAF50",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "icon.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "/icon.png",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
